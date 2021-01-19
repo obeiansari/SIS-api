@@ -34,7 +34,7 @@ router.post('/register', (req, res) => {
         } else {
             bcrypt.hash(password, saltRounds, (err, hash) => {
                 if (err) {
-                    console.log(err);
+                    res.status(500).json(err);
                 } else {
                     const data = {
                         username: req.body.username,
@@ -42,26 +42,28 @@ router.post('/register', (req, res) => {
                     }
                     query = `INSERT INTO users SET ?;`;
                     console.log(data);
-                    connection.query(query, [data], (error, results) => {
+                    connection.query(query, data, (error, results) => {
                         if (error) {
                             res.status(500).json(error);
                             return;
                         }
+
                         console.log(results);
-                        const body = data;
+                        const body = [data];
                         body.id = results.insertId;
+                        res.status(201).json(body);
                     });
                 }
             });
         }
+        // connection.end();
     });
 });
 
 router.post('/login', (req, res) => {
     const username = req.body.username;
     const password = req.body.password;
-
-    const query = 'SELECT * FROM users WHERE username = ? AND password = ?;';
+    const query = `SELECT * FROM users WHERE username = ?;`;
     const connection = mysql.createConnection({
         host: 'localhost',
         user: 'root',
@@ -69,34 +71,50 @@ router.post('/login', (req, res) => {
         database: 'sisapi_db'
     });
     connection.connect();
-    console.log(username, password);
-    connection.query(query, [username, password], (error, results) => {
+    connection.query(query, username, (error, results) => {
         if (error) {
             res.status(500).json(error);
-        }
-        if (results.length > 0) {
-            res.json(results[0]);
         } else {
-            res.json(null);
+            if (results.length > 0) {
+                const user = results[0];
+                const passwordHash = user.password;
+
+                bcrypt.compare(password, passwordHash, (error, bcryptResult) => {
+                    if (error) {
+                        res.status(500).json(error)
+                    } else {
+                        if (bcryptResult) {
+                            const secretKey = 'obei123';
+                            const payload = {
+                                id: user.id,
+                                username: user.username
+                            };
+                            const options = {
+                                expiresIn: 3600
+                            };
+                            jwt.sign(payload, secretKey, options, (error, token) => {
+                                if (error) {
+                                    res.status(500).json(error);
+                                }
+                                res.status(201).json({ token, user });
+
+                            });
+                        } else {
+                            res.status(401).json();
+                        }
+                    }
+                });
+            } else {
+                res.status(401).json();
+            }
         }
     });
 });
 
+router.post('/authorized', (req, res) => {
+    res.json({
+        authorized: true
+    });
+});
 
 module.exports = router;
-// if (req.body.username) {
-//     const secretKey = username;
-//     const payload = {
-//         id: body.id,
-//         username: req.body.username
-//     };
-//     const options = {
-//         expiresIn: 3600
-//     };
-//     jwt.sign(payload, secretKey, options, (err, token) => {
-//         if (err) {
-//             res.status(500).json(err);
-//         }
-//         res.status(201).json({ body, token, hash });
-//     });
-// }
