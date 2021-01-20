@@ -96,7 +96,7 @@ router.post('/login', (req, res) => {
                                 if (error) {
                                     res.status(500).json(error);
                                 }
-                                res.status(201).json({ token, user });
+                                res.status(201).json({ token, payload });
 
                             });
                         } else {
@@ -116,5 +116,6 @@ router.post('/authorized', (req, res) => {
         authorized: true
     });
 });
+
 
 module.exports = router;
