@@ -7,7 +7,7 @@ const auth = (req, res, next) => {
         next();
         return;
     }
-    const authorization = req.header.authorization;
+    const authorization = req.headers.authorization;
 
     if (authorization) {
         const [scheme, token] = authorization.split(' ');
