@@ -4,6 +4,8 @@ const mysql = require('mysql');
 const bcrypt = require('bcrypt');
 const router = express.Router();
 const saltRounds = 10;
+// const connection = require("../db-connection").promise();   //importing database file we need to require db file
+const connection = require('../config/db')
 
 router.post('/register', (req, res) => {
     const username = req.body.username;
@@ -12,15 +14,6 @@ router.post('/register', (req, res) => {
     if (!username || !password) {
         res.status(400).json();
     }
-
-    const connection = mysql.createConnection({
-        host: 'localhost',
-        user: 'root',
-        password: '',
-        database: 'sisapi_db'
-    });
-    connection.connect();
-
     let query = `SELECT * FROM users WHERE username = ?;`;
     connection.query(query, [username], (error, results) => {
         if (error) {
@@ -64,13 +57,6 @@ router.post('/login', (req, res) => {
     const username = req.body.username;
     const password = req.body.password;
     const query = `SELECT * FROM users WHERE username = ?;`;
-    const connection = mysql.createConnection({
-        host: 'localhost',
-        user: 'root',
-        password: '',
-        database: 'sisapi_db'
-    });
-    connection.connect();
     connection.query(query, username, (error, results) => {
         if (error) {
             res.status(500).json(error);
@@ -90,7 +76,7 @@ router.post('/login', (req, res) => {
                                 username: user.username
                             };
                             const options = {
-                                expiresIn: 3600
+                                expiresIn: 10
                             };
                             jwt.sign(payload, secretKey, options, (error, token) => {
                                 if (error) {

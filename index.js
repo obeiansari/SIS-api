@@ -16,9 +16,7 @@ app.get('/', (req, res) => {
 app.use(auth);
 
 app.use('/api/account', require('./api/account'));
-
-// app.use('/api/payment', require('./api/payment'));
-
+app.use('/api/posts', require('./api/post'));
 
 app.listen(PORT, () => {
     console.log(`server listen on ${PORT}`);
