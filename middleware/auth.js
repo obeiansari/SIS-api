@@ -1,7 +1,5 @@
 const jwt = require('jsonwebtoken');
 const express = require('express');
-
-
 const auth = (req, res, next) => {
     if (req.path.includes('login') || req.path.includes('register')) {
         next();

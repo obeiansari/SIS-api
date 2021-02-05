@@ -14,7 +14,6 @@ app.get('/', (req, res) => {
 });
 
 app.use(auth);
-
 app.use('/api/account', require('./api/account'));
 app.use('/api/posts', require('./api/post'));
 

@@ -20,9 +20,10 @@ router.post('/register', (req, res) => {
             res.status(500).json(error);
         }
         if (results.length > 0) {
+            // const msg = `${username} already exist`
             // user already exist
             res.status(409).json({
-                message: 'Email already exist'
+                message: `${username} already exist`
             });
         } else {
             bcrypt.hash(password, saltRounds, (err, hash) => {
@@ -76,7 +77,7 @@ router.post('/login', (req, res) => {
                                 username: user.username
                             };
                             const options = {
-                                expiresIn: 10
+                                expiresIn: 3600
                             };
                             jwt.sign(payload, secretKey, options, (error, token) => {
                                 if (error) {

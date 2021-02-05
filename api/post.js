@@ -1,4 +1,5 @@
 const express = require('express');
+const jwt = require('jsonwebtoken');
 // const mysql = require('mysql');
 const router = express.Router();
 const connection = require('../config/db');
@@ -9,7 +10,6 @@ router.get('/getAll', (req, res) => {
         if (error) {
             res.status(500).json(error);
         }
-        console.log('post hello');
         res.json(results);
     });
 });
@@ -25,6 +25,21 @@ router.get('/get/:id', (req, res) => {
             res.json(results[0]);
         } else {
             res.json(null);
+        }
+    });
+});
+
+router.get('/edit/get/:id', (req, res) => {
+    const id = req.params.id;
+    const query = `SELECT title, body FROM post WHERE id=?;`;
+    connection.query(query, [id], (error, results) => {
+        if (error) {
+            res.status(500).json(error);
+        }
+        if (results.length > 0) {
+            res.json(results[0]);
+        } else {
+            res.status(404).json({ message: 'record not found' });
         }
     });
 });
